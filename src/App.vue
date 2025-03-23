@@ -21,8 +21,8 @@
 }
 
 .container {
-  max-width: 960px;
-  margin: 0 auto;
+  /* max-width: 960px; */
+  margin: 0 5%;
 }
 
 .container h1 {
@@ -34,10 +34,11 @@
 
 nav ul {
   list-style: none;
-  margin: 0;
+  margin: 10px 0;
   padding: 0;
   display: flex;
   justify-content:center;
+  background-color: rgb(211, 201, 210);
 }
 
 nav a {
@@ -50,5 +51,17 @@ nav a {
 
 nav a:hover {
   background-color: rgb(212, 189, 211);
+}
+
+button {
+    border: none;
+    background-color: rgb(212, 189, 211);
+    padding: 10px 15px;
+    font-size: 1.2em;
+    cursor: pointer;
+}
+
+button:hover {
+    box-shadow: 0px 5px 5px 0px rgba(34, 60, 80, 0.2);;
 }
 </style>
