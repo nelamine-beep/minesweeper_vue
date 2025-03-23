@@ -8,6 +8,7 @@ const routes = [
   { path: '/settings', component: Settings },
   { path: '/game', component: Game },
   { path: '/leaderboard', component: Leaderboard },
+  // добавить страницу ошибки 404
 ];
 
 const router = createRouter({

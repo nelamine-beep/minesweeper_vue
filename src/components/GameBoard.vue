@@ -1,7 +1,9 @@
 <template>
     <div>
-        Здесь игровое поле
-    </div>
+        <h1>Игра</h1>
+        <p>Размер поля: {{ width }} x {{ height }}</p>
+        <p>Количество мин: {{ mines }}</p>
+      </div>
 </template>
 
 <script>

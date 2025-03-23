@@ -1,10 +1,14 @@
 <template>
   <div class="container">
     <h1>Игра "Сапёр"</h1>
-  </div>
-  <main>
+    <nav>
+      <ul>
+        <li><router-link to="/settings">Настройки</router-link></li>
+        <li><router-link to="/leaderboard">Таблица лидеров</router-link></li>
+      </ul>
+    </nav>
     <router-view />
-  </main>
+  </div>
 </template>
 
 <style>
@@ -16,8 +20,35 @@
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
 
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
 .container h1 {
-  margin: 30px auto;
+  padding: 10px;
+  border: 10px dotted rgb(212, 189, 211);
+  margin: 20px auto;
   text-align: center;
+}
+
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content:center;
+}
+
+nav a {
+  margin: 0 10px;
+  padding: 5px 10px;
+  text-decoration: none;
+  color: #000;
+  font-size: 1.5em;
+}
+
+nav a:hover {
+  background-color: rgb(212, 189, 211);
 }
 </style>
