@@ -9,7 +9,15 @@
             >
             <label :for="level.text">{{level.text}}, {{level.row}}*{{level.col}},  {{level.mines}} мин</label>
             <br>
-
+        </div>
+        <div class="choice-level">
+            <input type="radio" id="custom" value="custom" v-model="selectedLevel">
+            <label for="custom">Кастомный режим</label>
+            <div v-if="selectedLevel === 'custom'" class="custom-options">
+                <label>Кол-во рядов: <input type="number" v-model.number="customRow" min="2" max="50"></label>
+                <label>Кол-во колонок: <input type="number" v-model.number="customCol" min="2" max="50"></label>
+                <label>Кол-во мин: <input type="number" v-model.number="customMines" :max="maxMines"></label>
+            </div>
         </div>
         <button @click="startGame">Начать игру</button>
     </div>
@@ -25,19 +33,43 @@ export default {
                 {text: "Сложный", row: 32, col: 16, mines: 100},
             ],
             selectedLevel: null,
+            customCol: 2,
+            customRow: 2,
+            customMines: 2,
+        }
+    },
+    computed: {
+        maxMines() {
+            return this.customRow * this.customCol - 1;
         }
     },
     methods: {
         startGame() {
-            if (!this.selectedLevel) {
-                alert('Пожалуйста, выберите уровень игры!');
+            let settings;
+            if (this.selectedLevel === "custom") {
+                if (this.customMines >= this.maxMines) {
+                    alert("Слишком много мин!");
+                    return;
+                }
+                if (this.customRow > 50 || this.customCol > 50) {
+                    alert("Слишком большие значения!");
+                    return;
+                }
+                settings = {
+                    row: this.customRow,
+                    col: this.customCol,
+                    mines: this.customMines,
+                };
+            } else if (this.selectedLevel) {
+                settings = {
+                    row: this.selectedLevel.row,
+                    col: this.selectedLevel.col,
+                    mines: this.selectedLevel.mines,
+                };
+            } else {
+                alert("Пожалуйста, выберите уровень игры!");
                 return;
             }
-            const settings = {
-                row: this.selectedLevel.row,
-                col: this.selectedLevel.col,
-                mines: this.selectedLevel.mines,
-            };
             this.$router.push({
                 path: "/game",
                 query: { 
@@ -63,11 +95,19 @@ export default {
     font-size: 1.2rem;
     margin: 15px auto;
 }
-
+.custom-options {
+    display: flex;
+    flex-direction: column;
+}
 input[type="radio"] {
-  accent-color: #ff6fe0;
-  margin-right: 5px;
-  width: 15px;
-  height: 15px;
+    accent-color: #ff6fe0;
+    margin-right: 5px;
+    width: 15px;
+    height: 15px;
+}
+input[type="number"] {
+    height: 25px;
+    width: 100%;
+    font-size: 100%;
 }
 </style>
