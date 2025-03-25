@@ -41,9 +41,11 @@ export default {
         gameStart:false,
         gameOver: false,
         gameWin: false,
+        firstMove: true,
         openedCells: 0,
         markedCells: 0,
         time: 0,
+        timer: null,
     };
   },
   created() {
@@ -60,8 +62,6 @@ export default {
           mineOnCell: false,
           count: 0,
         })));
-      this.putMine();
-      this.countingNumbersOnCell();
     },
     startTimer() {
       this.timer = setInterval(() => { this.time++; }, 1000);
@@ -69,16 +69,17 @@ export default {
     stopTimer() {
       clearInterval(this.timer);
     },
-    putMine() {
+    putMine(firstMoveRow, firstMoveCol) {
       let countMines = this.mines;
       while (countMines > 0) {
         const randRow = Math.floor(Math.random()*this.row);
         const randCol = Math.floor(Math.random()*this.col);
-        if (!this.board[randRow][randCol].mineOnCell) {
+        if ((randRow === firstMoveRow && randCol === firstMoveCol) || this.board[randRow][randCol].mineOnCell) {
+          continue;
+        }
           this.board[randRow][randCol].mineOnCell = true;
           this.countingNumbersOnCell(randRow, randCol);
           countMines--;
-        }
       }
     },
     countingNumbersOnCell(row, col) {
@@ -102,6 +103,10 @@ export default {
         this.gameStart = true;
       }
       const cell = this.board[row][col];
+      if (this.firstMove) {
+        this.firstMove = false;
+        this.putMine(row, col);
+      }
       if (cell.flagged || cell.questioned || cell.opened) return;
       if (cell.mineOnCell) {
         cell.mined = true;
@@ -189,6 +194,7 @@ export default {
       this.gameWin = false;
       this.gameStart = false;
       this.gameOver = false;
+      this.firstMove = true;
     }
   }
 }
