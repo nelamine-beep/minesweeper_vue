@@ -16,7 +16,7 @@
             <div v-if="selectedLevel === 'custom'" class="custom-options">
                 <label>Кол-во рядов: <input type="number" v-model.number="customRow" min="2" max="50"></label>
                 <label>Кол-во колонок: <input type="number" v-model.number="customCol" min="2" max="50"></label>
-                <label>Кол-во мин: <input type="number" v-model.number="customMines" :max="maxMines"></label>
+                <label>Кол-во мин: <input type="number" v-model.number="customMines" min="1" :max="maxMines"></label>
             </div>
         </div>
         <button @click="startGame">Начать игру</button>
@@ -52,7 +52,7 @@ export default {
                     return;
                 }
                 if (this.customRow > 50 || this.customCol > 50) {
-                    alert("Слишком большие значения!");
+                    alert("Слишком большие значения полей!");
                     return;
                 }
                 settings = {
@@ -109,5 +109,11 @@ input[type="number"] {
     height: 25px;
     width: 100%;
     font-size: 100%;
+}
+
+@media (max-width: 740px) {
+    .settings {
+    width: 100%;
+}
 }
 </style>

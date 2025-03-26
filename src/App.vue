@@ -21,7 +21,6 @@
 }
 
 .container {
-  /* max-width: 960px; */
   margin: 0 5%;
 }
 
@@ -40,7 +39,9 @@ nav ul {
   justify-content:center;
   background-color: rgb(211, 201, 210);
 }
-
+nav li {
+  display: flex;
+}
 nav a {
   margin: 0 10px;
   padding: 5px 10px;

@@ -2,20 +2,18 @@
     <div class="game">
         <div class="description">
             <h3>Размер поля: {{ row }} x {{ col }}</h3>
-            <!-- <h3>Кол-во клеток без мин: {{row*col - mines}}</h3>
-            <h3>Кол-во оставшихся свободных: {{row*col - mines - openedCells}}</h3> -->
             <h3>Оставшиеся мины: {{ mines - markedCells }}</h3>
             <h3>Время: {{ time }} секунд</h3>
+            <h3 v-if="gameWin === true" class="status">Вы выиграли!</h3>
+            <h3 v-if="gameOver === true" class="status">Вы проиграли!</h3>
             <div class="buttons">
                 <button @click="restartGame">Перезапуск</button>
-                <h2 v-if="gameWin === true">Вы выиграли!</h2>
-                <h2 v-if="gameOver === true">Вы проиграли!</h2>
                 <router-link to="/"><button>Назад</button></router-link>
             </div>
         </div>
         <div class="board">
             <div class="game-board">
-              <div v-for="(row, rowIndex) in board" :key="rowIndex" class="row">
+              <div v-for="(row, rowIndex) in board" :key="rowIndex">
                 <div v-for="(cell, colIndex) in row" 
                 :key="colIndex" 
                 class="cell" 
@@ -31,6 +29,7 @@
 </template>
 
 <script>
+import { useRecordStore } from '../stores/leaderboard';
 export default {
   data() {
     return {
@@ -143,16 +142,13 @@ export default {
           });
     },
     markCell(rowIndex, colIndex) {
-      if (this.gameOver) return;
-      if (!this.gameStart){
-        this.startTimer();
-        this.gameStart = true;
-      }
-      const cell = this.board[rowIndex][colIndex];
-      if (this.markedCells === this.mines) {
-        gameIsWon();
-      }
-      else {
+      if (!this.firstMove) {
+        if (this.gameOver) return;
+        if (!this.gameStart){
+          this.startTimer();
+          this.gameStart = true;
+        }
+        const cell = this.board[rowIndex][colIndex];
         if (!cell.opened) {
           if (cell.flagged) {
               if (cell.mineOnCell) this.markedCells--;
@@ -164,6 +160,9 @@ export default {
               cell.flagged = true;
               if (cell.mineOnCell) this.markedCells++;
           }
+        }
+        if (this.markedCells === this.mines) {
+            this.gameIsWon();
         }
       }
     },
@@ -184,6 +183,16 @@ export default {
       this.gameWin = true;
       this.openedAllMines();
       this.stopTimer();
+      const recordStore = useRecordStore();
+         const gameRecord = {
+            date: new Date().toLocaleString(),
+            row: this.row,
+            col: this.col,
+            time: this.time,
+            mines: this.mines,
+         };
+
+         recordStore.addRecord(gameRecord);
     },
     restartGame() {
       this.initBoard();
@@ -205,9 +214,20 @@ export default {
       width: 70%;
       margin: 0 auto;
   }
+  .description h3 {
+    font-size: clamp(1rem, 2.3vmin, 2rem);
+  }
+  .status {
+    text-align: center;
+    border: 2px solid rgb(212, 189, 211);
+    margin-bottom: 5px;
+  }
   .buttons {
       display: flex;
       justify-content: space-between;
+  }
+  .buttons button {
+    font-size: clamp(1rem, 2.3vmin, 2rem);
   }
   .board {
     display: flex;
@@ -216,11 +236,11 @@ export default {
   .game-board {
     margin: 10px 0;
     display: grid;
-    grid-template-columns: repeat(v-bind(row), minmax(30px, 1fr));
+    grid-template-columns: repeat(v-bind(row), minmax(5px, 60px));
   }
   .cell {
-    width: 40px;
-    height: 40px;
+    width: 100%;
+    aspect-ratio: 1/1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -247,7 +267,7 @@ export default {
     background-image: url(./../assets/bomb.png);
     background-size: cover;
   }
-  .cell span {background-color: rgb(245, 213, 223);}
+  .cell span {background-color: rgb(245, 213, 223); font-size: clamp(0.3rem, 2vmin, 2rem);}
   .mine-1 {color: blue;}
   .mine-2 {color: green;}
   .mine-3 {color: red;}
