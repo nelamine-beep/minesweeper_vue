@@ -1,19 +1,28 @@
-# minesweeper_vue
+# Игра "Minesweeper" на Vue3
 
-## Project setup
+Это веб-версия игры **Minesweeper**, разработанная с использованием **Vue.js**.
+
+Игра содержит:
+- 3 уровня сложности: Простой (8x8, 10 мин), Средний (16x16, 40 мин), Сложный (32x16, 100 мин)
+- Кастомный режим для пользовательских настроек
+- Безпроигрышный первый ход
+- Автоматическая победа при открытии всех свободных клеток
+- Сохранение лучших результов с помощью LocalStorage (Pinia)
+
+## Демо
+
+Демо-версия игры доступна по следующей [ссылке](https://nelamine-beep.github.io/minesweeper_vue/).
+
+## Запуск проекта локально
+### 1. Клонируйте репозиторий
+```
+git clone https://github.com/nelamine-beep/minesweeper_vue.git
+```
+### 2. Установите зависимости
 ```
 npm install
 ```
-
-### Compiles and hot-reloads for development
+### 3. Запустите локальный  сервер
 ```
 npm run serve
 ```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
