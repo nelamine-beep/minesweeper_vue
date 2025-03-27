@@ -256,7 +256,12 @@ export default {
     background-image: url(./../assets/bomb.png);
     background-size: cover;
   }
-  .cell span {background-color: rgb(245, 213, 223); font-size: clamp(0.6rem, 2.5vmin, 2rem);}
+  .cell span {background-color: rgb(245, 213, 223); font-size: clamp(0.5rem, 2.2vmin, 2rem);}
+  @media (max-width: 500px) {
+    .cell span {
+      font-size: clamp(0.4rem, 2vmin, 2rem);
+    }
+  }
   .mine-1 {color: blue;}
   .mine-2 {color: green;}
   .mine-3 {color: red;}
