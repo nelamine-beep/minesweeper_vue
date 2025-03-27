@@ -2,7 +2,7 @@
     <div class="game">
         <div class="description">
             <h3>Размер поля: {{ row }} x {{ col }}</h3>
-            <h3>Оставшиеся мины: {{ mines - markedCells }}</h3>
+            <h3>Доступные флажки: {{ mines - totalFlags }}</h3>
             <h3>Время: {{ time }} секунд</h3>
             <h3 v-if="gameWin === true" class="status">Вы выиграли!</h3>
             <h3 v-if="gameOver === true" class="status">Вы проиграли!</h3>
@@ -17,7 +17,7 @@
                 <div v-for="(cell, colIndex) in row" 
                 :key="colIndex" 
                 class="cell" 
-                :class="{opened: cell.opened, flagged: cell.flagged, questioned: cell.questioned, mined: cell.mined}"
+                :class="{opened: cell.opened, flagged: cell.flagged, questioned: cell.questioned, mined: (cell.mined && (gameOver || gameWin))}"
                 @click="openCell(rowIndex, colIndex)"
                 @contextmenu.prevent="markCell(rowIndex, colIndex)">
                 <span v-if="cell.opened && cell.count > 0" :class="'mine-' + cell.count">{{ cell.count }}</span>
@@ -43,8 +43,14 @@ export default {
         firstMove: true,
         openedCells: 0,
         markedCells: 0,
+        totalFlags: 0,
         time: 0,
         timer: null,
+        directions: [
+        [-1, -1], [-1, 0], [-1, 1],
+        [0, -1],           [0, 1],
+        [1, -1], [1, 0], [1, 1]
+      ],
     };
   },
   created() {
@@ -58,7 +64,6 @@ export default {
           flagged: false,
           questioned: false,
           mined: false,
-          mineOnCell: false,
           count: 0,
         })));
     },
@@ -73,21 +78,14 @@ export default {
       while (countMines > 0) {
         const randRow = Math.floor(Math.random()*this.row);
         const randCol = Math.floor(Math.random()*this.col);
-        if ((randRow === firstMoveRow && randCol === firstMoveCol) || this.board[randRow][randCol].mineOnCell) {
-          continue;
-        }
-          this.board[randRow][randCol].mineOnCell = true;
+        if ((randRow === firstMoveRow && randCol === firstMoveCol) || this.board[randRow][randCol].mined) { continue; }
+          this.board[randRow][randCol].mined = true;
           this.countingNumbersOnCell(randRow, randCol);
           countMines--;
       }
     },
     countingNumbersOnCell(row, col) {
-      const directions = [
-        [-1, -1], [-1, 0], [-1, 1], 
-        [0, -1],         [0, 1], 
-        [1, -1], [1, 0], [1, 1]
-      ];
-      directions.forEach(([dx, dy]) => {
+      this.directions.forEach(([dx, dy]) => {
         const newRow = row + dx;
         const newCol = col + dy;
         if (newRow >= 0 && newRow < this.row && newCol >= 0 && newCol < this.col) {
@@ -101,14 +99,13 @@ export default {
         this.startTimer();
         this.gameStart = true;
       }
-      const cell = this.board[row][col];
       if (this.firstMove) {
         this.firstMove = false;
         this.putMine(row, col);
       }
+      const cell = this.board[row][col];
       if (cell.flagged || cell.questioned || cell.opened) return;
-      if (cell.mineOnCell) {
-        cell.mined = true;
+      if (cell.mined) {
         this.openedAllMines();
       } 
       else {
@@ -125,55 +122,47 @@ export default {
       }
     },
     openedNeighbors(row, col) {
-      const directions = [
-            [-1, -1], [-1, 0], [-1, 1], 
-            [0, -1], [0, 1], 
-            [1, -1], [1, 0], [1, 1]
-          ];
-          directions.forEach(([dx, dy]) => {
-            const newRow = row + dx;
-            const newCol = col + dy;
-            if (newRow >= 0 && newRow < this.row && newCol >= 0 && newCol < this.col) {
-              const neighborCell = this.board[newRow][newCol];
-              if (!neighborCell.opened && !neighborCell.flagged && !neighborCell.mineOnCell) {
-                this.openCell(newRow, newCol);
-              }
-            }
-          });
+      this.directions.forEach(([dx, dy]) => {
+        const newRow = row + dx;
+        const newCol = col + dy;
+        if (newRow >= 0 && newRow < this.row && newCol >= 0 && newCol < this.col) {
+          const neighborCell = this.board[newRow][newCol];
+          if (!neighborCell.opened && !neighborCell.flagged && !neighborCell.mined) {
+            this.openCell(newRow, newCol);
+          }
+        }
+      });
     },
     markCell(rowIndex, colIndex) {
-      if (!this.firstMove) {
-        if (this.gameOver) return;
-        if (!this.gameStart){
+      if (this.gameOver || this.gameWin) return;
+      if (!this.gameStart){
           this.startTimer();
           this.gameStart = true;
-        }
-        const cell = this.board[rowIndex][colIndex];
-        if (!cell.opened) {
-          if (cell.flagged) {
-              if (cell.mineOnCell) this.markedCells--;
-              cell.flagged = false;
-              cell.questioned = true;
-          } else if (cell.questioned) {
-              cell.questioned = false;
-          } else {
-              cell.flagged = true;
-              if (cell.mineOnCell) this.markedCells++;
-          }
-        }
-        if (this.markedCells === this.mines) {
-            this.gameIsWon();
-        }
       }
+      const cell = this.board[rowIndex][colIndex];
+      if (cell.opened) return;
+      if (!cell.flagged && !cell.questioned) {
+          if (this.totalFlags < this.mines) {
+            cell.flagged = true;
+            this.totalFlags++;
+            if (cell.mined) this.markedCells++;
+          }
+          else {
+            cell.questioned = true;
+          }
+      } 
+      else if (cell.flagged) {
+          cell.flagged = false;
+          cell.questioned = true;
+          this.totalFlags--;
+          if (cell.mined) this.markedCells--;
+      } 
+      else if (cell.questioned) {
+          cell.questioned = false;
+      }
+      if (this.markedCells === this.mines) this.gameIsWon();
     },
     openedAllMines() {
-      this.board.forEach(row => {
-        row.forEach(cell => {
-          if (cell.mineOnCell) {
-            cell.mined = true;
-          }
-        })
-      });
       if (!this.gameWin) {
         this.gameOver = true;
       }
@@ -191,7 +180,6 @@ export default {
             time: this.time,
             mines: this.mines,
          };
-
          recordStore.addRecord(gameRecord);
     },
     restartGame() {
@@ -200,6 +188,7 @@ export default {
       this.time = 0;
       this.markedCells = 0;
       this.openedCells = 0;
+      this.totalFlags = 0,
       this.gameWin = false;
       this.gameStart = false;
       this.gameOver = false;
@@ -267,7 +256,7 @@ export default {
     background-image: url(./../assets/bomb.png);
     background-size: cover;
   }
-  .cell span {background-color: rgb(245, 213, 223); font-size: clamp(0.3rem, 2vmin, 2rem);}
+  .cell span {background-color: rgb(245, 213, 223); font-size: clamp(0.6rem, 2.5vmin, 2rem);}
   .mine-1 {color: blue;}
   .mine-2 {color: green;}
   .mine-3 {color: red;}
