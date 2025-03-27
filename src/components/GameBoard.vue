@@ -135,13 +135,10 @@ export default {
     },
     markCell(rowIndex, colIndex) {
       if (this.gameOver || this.gameWin) return;
-      if (!this.gameStart){
-          this.startTimer();
-          this.gameStart = true;
-      }
       const cell = this.board[rowIndex][colIndex];
       if (cell.opened) return;
-      if (!cell.flagged && !cell.questioned) {
+      if (this.gameStart) {
+        if (!cell.flagged && !cell.questioned) {
           if (this.totalFlags < this.mines) {
             cell.flagged = true;
             this.totalFlags++;
@@ -161,6 +158,7 @@ export default {
           cell.questioned = false;
       }
       if (this.markedCells === this.mines) this.gameIsWon();
+      }
     },
     openedAllMines() {
       if (!this.gameWin) {
